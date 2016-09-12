@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BrowserPass
 {
@@ -10,50 +7,34 @@ namespace BrowserPass
     {
         static void Main(string[] args)
         {
-            Console.WriteLine(" =========== Chrome =========== ");
-            try
-            {
-                var chrome = new ChromePassReader().ReadPasswords();
-                PrintCredentials(chrome);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Cannot get chrome passwords: " + ex.Message);
-            }
-            
+            List<IPassReader> readers = new List<IPassReader>();
+            readers.Add(new ChromePassReader());
+            readers.Add(new FirefoxPassReader());
+            readers.Add(new IE10PassReader());
 
-            Console.WriteLine("");
-            Console.WriteLine(" =========== IE10/Edge  =========== ");
-            try
+            foreach (var reader in readers)
             {
-                var ie10 = new IE10PassReader().ReadPasswords();
-                PrintCredentials(ie10);
+                Console.WriteLine($"== {reader.BrowserName} ============================================ ");
+                try
+                {
+                    PrintCredentials(reader.ReadPasswords());
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error reading {reader.BrowserName} passwords: " + ex.Message);
+                }
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Cannot get chrome passwords: " + ex.Message);
-            }
-            
-            Console.WriteLine("");
-            Console.WriteLine(" =========== Firefox =========== ");
-            try
-            {
-                var ff = new FirefoxPassReader().ReadPasswords();
-                PrintCredentials(ff);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Cannot get chrome passwords: " + ex.Message);
-            }
-            
 
-            Console.ReadKey();
+#if DEBUG
+            Console.ReadLine();
+#endif
+
         }
 
-        static void PrintCredentials(IEnumerable<BrowserCredential> data)
+        static void PrintCredentials(IEnumerable<CredentialModel> data)
         {
             foreach (var d in data)
-                Console.WriteLine($"{d.Url}\t {d.Username}\t {d.Password}");
+                Console.WriteLine($"{d.Url}\r\n\tU: {d.Username}\r\n\tP: {d.Password}\r\n");
         }
     }
 }

