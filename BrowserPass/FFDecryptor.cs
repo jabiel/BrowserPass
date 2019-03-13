@@ -28,30 +28,50 @@ namespace BrowserPass
 
         public static string Decrypt(string cypherText)
         {
+            IntPtr ffDataUnmanagedPointer = IntPtr.Zero;
             StringBuilder sb = new StringBuilder(cypherText);
-            int hi2 = NSSBase64_DecodeBuffer(IntPtr.Zero, IntPtr.Zero, sb, sb.Length);
-            TSECItem tSecDec = new TSECItem();
-            TSECItem item = (TSECItem)Marshal.PtrToStructure(new IntPtr(hi2), typeof(TSECItem));
-            if (PK11SDR_Decrypt(ref item, ref tSecDec, 0) == 0)
+
+            try
             {
-                if (tSecDec.SECItemLen != 0)
+                byte[] ffData = Convert.FromBase64String(cypherText);
+
+                ffDataUnmanagedPointer = Marshal.AllocHGlobal(ffData.Length);
+                Marshal.Copy(ffData, 0, ffDataUnmanagedPointer, ffData.Length);
+
+                TSECItem tSecDec = new TSECItem();
+                TSECItem item = new TSECItem();
+                item.SECItemType = 0;
+                item.SECItemData = ffDataUnmanagedPointer;
+                item.SECItemLen = ffData.Length;
+
+                if (PK11SDR_Decrypt(ref item, ref tSecDec, 0) == 0)
                 {
-                    byte[] bvRet = new byte[tSecDec.SECItemLen];
-                    Marshal.Copy(new IntPtr(tSecDec.SECItemData), bvRet, 0, tSecDec.SECItemLen);
-                    return Encoding.ASCII.GetString(bvRet);
+                    if (tSecDec.SECItemLen != 0)
+                    {
+                        byte[] bvRet = new byte[tSecDec.SECItemLen];
+                        Marshal.Copy(tSecDec.SECItemData, bvRet, 0, tSecDec.SECItemLen);
+                        return Encoding.ASCII.GetString(bvRet);
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                return null;
+            }
+            finally
+            {
+                if (ffDataUnmanagedPointer != IntPtr.Zero)
+                {
+                    Marshal.FreeHGlobal(ffDataUnmanagedPointer);
+
+                }
+            }
+
             return null;
         }
         
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate int DLLFunctionDelegate4(IntPtr arenaOpt, IntPtr outItemOpt, StringBuilder inStr, int inLen);
-        public static int NSSBase64_DecodeBuffer(IntPtr arenaOpt, IntPtr outItemOpt, StringBuilder inStr, int inLen)
-        {
-            IntPtr pProc = GetProcAddress(NSS3, "NSSBase64_DecodeBuffer");
-            DLLFunctionDelegate4 dll = (DLLFunctionDelegate4)Marshal.GetDelegateForFunctionPointer(pProc, typeof(DLLFunctionDelegate4));
-            return dll(arenaOpt, outItemOpt, inStr, inLen);
-        }
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate int DLLFunctionDelegate5(ref TSECItem data, ref TSECItem result, int cx);
         public static int PK11SDR_Decrypt(ref TSECItem data, ref TSECItem result, int cx)
@@ -65,7 +85,7 @@ namespace BrowserPass
         public struct TSECItem
         {
             public int SECItemType;
-            public int SECItemData;
+            public IntPtr SECItemData;
             public int SECItemLen;
         }
     }
