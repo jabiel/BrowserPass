@@ -36,6 +36,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="BouncyCastle.Crypto, Version=1.8.6.0, Culture=neutral, PublicKeyToken=0e99375e54769942">
+      <HintPath>..\packages\BouncyCastle.1.8.6.1\lib\BouncyCastle.Crypto.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -55,6 +58,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="Windows" />
     <Reference Include="Windows.Security" />
   </ItemGroup>
   <ItemGroup>
@@ -62,6 +66,7 @@
     <Compile Include="ChromePassReader.cs" />
     <Compile Include="FFDecryptor.cs" />
     <Compile Include="FirefoxPassReader.cs" />
+    <Compile Include="GCDecryptor.cs" />
     <Compile Include="IE10PassReader.cs" />
     <Compile Include="IPassReader.cs" />
     <Compile Include="Program.cs" />
