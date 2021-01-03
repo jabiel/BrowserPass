@@ -4,13 +4,14 @@ using System.Collections.Generic;
 namespace BrowserPass
 {
     // Missing windows.security? https://software.intel.com/en-us/articles/using-winrt-apis-from-desktop-applications
+    // or check path to Windows.winmd in csproj file
     class Program
     {
         static void Main(string[] args)
         {
             List<IPassReader> readers = new List<IPassReader>();
-            readers.Add(new ChromePassReader());
             readers.Add(new FirefoxPassReader());
+            readers.Add(new ChromePassReader());
             readers.Add(new IE10PassReader());
 
             foreach (var reader in readers)

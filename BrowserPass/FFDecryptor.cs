@@ -16,11 +16,19 @@ namespace BrowserPass
         public static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate long DLLFunctionDelegate(string configdir);
+
+        private const string ffFolderName = @"\Mozilla Firefox\";
         public static long NSS_Init(string configdir)
         {
-            string MozillaPath = Environment.GetEnvironmentVariable("PROGRAMFILES") + @"\Mozilla Firefox\";
-            LoadLibrary(MozillaPath + "mozglue.dll");
-            NSS3 = LoadLibrary(MozillaPath + "nss3.dll");
+
+            var mozillaPath = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + ffFolderName;
+            if(!System.IO.Directory.Exists(mozillaPath))
+                mozillaPath = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86) + ffFolderName;
+            if (!System.IO.Directory.Exists(mozillaPath))
+                throw new Exception("Firefox folder not found");
+
+            LoadLibrary(mozillaPath + "mozglue.dll");
+            NSS3 = LoadLibrary(mozillaPath + "nss3.dll");
             IntPtr pProc = GetProcAddress(NSS3, "NSS_Init");
             DLLFunctionDelegate dll = (DLLFunctionDelegate)Marshal.GetDelegateForFunctionPointer(pProc, typeof(DLLFunctionDelegate));
             return dll(configdir);
