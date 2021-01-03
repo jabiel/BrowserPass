@@ -37,15 +37,20 @@ namespace BrowserPass
                             
                             if (reader.HasRows)
                             {
+                                var key = GCDecryptor.GetKey();
                                 while (reader.Read())
                                 {
-                                    var pass = Encoding.UTF8.GetString(ProtectedData.Unprotect(GetBytes(reader, 2), null, DataProtectionScope.CurrentUser));
+                                    byte[] nonce, ciphertextTag;
+                                    var encryptedData = GetBytes(reader, 2);
+                                    GCDecryptor.Prepare(encryptedData, out nonce, out ciphertextTag);
+                                    var pass = GCDecryptor.Decrypt(ciphertextTag, key, nonce);
 
-                                    result.Add(new CredentialModel() {
-                                         Url = reader.GetString(0),
-                                         Username = reader.GetString(1),
-                                         Password = pass
-                                    });                                    
+                                    result.Add(new CredentialModel()
+                                               {
+                                                   Url = reader.GetString(0),
+                                                   Username = reader.GetString(1),
+                                                   Password = pass
+                                               });
                                 }
                             }
                         }                            
